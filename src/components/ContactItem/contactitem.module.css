@@ -1,0 +1,140 @@
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  padding: 20px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+.imgName {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 230px;
+  gap: 30px;
+  overflow: hidden;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.numBtn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.mobile {
+  display: none;
+}
+
+@media (max-width: 430px) {
+  .mobile {
+    display: flex;
+    gap: 8px;
+    width: 120px;
+    flex-direction: column;
+    text-align: left;
+    font-size: 14px;
+    overflow: hidden;
+    margin-right: 20px;
+  }
+
+  .number.desktop,
+  .name.desktop {
+    display: none;
+  }
+
+  .mobile .number {
+    margin: 0;
+  }
+
+  .mobile .name {
+    margin-top: 0;
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .imgName {
+    max-width: none;
+    width: auto;
+    margin-right: 20px;
+    overflow: visible;
+  }
+}
+
+.name {
+  margin: 0;
+}
+
+.number {
+  color: #a3a1dc;
+  text-decoration: none;
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+.number:hover {
+  color: #fff;
+  text-shadow: rgb(255, 255, 255) 1px 0 10px;
+}
+
+.number,
+.button {
+  margin-left: 20px;
+}
+
+.image {
+  width: 60px;
+  height: 60px;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #4a54b3;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  transition: background-color 0.4s, transform 0.2s;
+}
+
+@media (max-width: 430px) {
+  .button {
+    margin-left: auto;
+  }
+}
+
+.button:hover {
+  background-color: #5f68bb;
+}
+
+.button:active {
+  transform: scale(0.9);
+}
+
+.button:hover > .icon {
+  animation: shake 1s;
+}
+
+@keyframes shake {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+  10%,
+  30% {
+    transform: rotate(-10deg);
+  }
+  20%,
+  40% {
+    transform: rotate(10deg);
+  }
+}
