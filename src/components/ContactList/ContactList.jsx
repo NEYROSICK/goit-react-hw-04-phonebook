@@ -1,31 +1,76 @@
 import ContactItem from 'components/ContactItem';
-import PropTypes from 'prop-types';
 import cl from 'components/ContactList/contactList.module.css';
-import React from 'react';
+import React, { useContext } from 'react';
+import { Context } from 'context/globalContext';
 
-class ContactList extends React.Component {
-  componentDidMount = () => {
-    const storedContacts = localStorage.getItem('contacts');
-    const newContacts = storedContacts ? JSON.parse(storedContacts) : [];
-    this.props.updateContacts(newContacts);
+const ContactList = () => {
+  const { contacts, filter, setContacts } = useContext(Context);
+
+  const containsNumbers = inputString => {
+    const regex = /\d/;
+    return regex.test(inputString);
   };
 
-  renderContactList = (state, updateContacts, filteredContacts) => {
+  const containsOnlyNumbersRelated = inputString => {
+    const regex = /^[\d()\-\s]+$/;
+    return regex.test(inputString);
+  };
+
+  const containsOnlyNumbers = inputString => {
+    const regex = /^\d+$/; // Regular expression to match only digits
+    return regex.test(inputString);
+  };
+
+  const filterContacts = () => {
+    if (containsOnlyNumbersRelated(filter)) {
+      const filteredList = contacts.filter(contact => {
+        const temp =
+          contact.number
+            .split('')
+            .filter(digit => {
+              return containsOnlyNumbers(digit);
+            })
+            .join('')
+            .includes(filter) ||
+          contact.number
+            .split(' ')
+            .filter(num => num !== '')
+            .join('')
+            .includes(
+              filter
+                .split(' ')
+                .filter(num => num !== '')
+                .join('')
+            );
+        return temp;
+      });
+      return filteredList;
+    } else if (containsNumbers(filter)) {
+      return [];
+    } else {
+      const filteredList = contacts.filter(contact => {
+        return contact.name.toLowerCase().includes(filter.toLowerCase());
+      });
+      return filteredList;
+    }
+  };
+
+  const renderContactList = () => {
     const deleteContact = contactName => {
-      const newContacts = state.contacts.filter(
+      const newContacts = contacts.filter(
         contact => contact.name !== contactName
       );
-      updateContacts(newContacts);
+      setContacts(newContacts);
     };
 
-    if (!state.contacts.length) {
+    if (!contacts.length) {
       return (
         <p className={cl.emptyMessage}>
           Complete Emptiness {':('}
           <br /> Try to add some contacts to your phonebook
         </p>
       );
-    } else if (!filteredContacts.length && state.filter) {
+    } else if (!filterContacts().length && filter) {
       return (
         <p className={cl.emptyMessage}>
           Sorry, there is no such contact in your phonebook
@@ -34,7 +79,7 @@ class ContactList extends React.Component {
     } else {
       return (
         <ul className={cl.list}>
-          {filteredContacts.map(contact => {
+          {filterContacts().map(contact => {
             return (
               <ContactItem
                 deleteContact={deleteContact}
@@ -50,15 +95,7 @@ class ContactList extends React.Component {
     }
   };
 
-  render() {
-    const { state, updateContacts, filteredContacts } = this.props;
-
-    return this.renderContactList(state, updateContacts, filteredContacts);
-  }
-}
-
-ContactList.propTypes = {
-  state: PropTypes.object.isRequired,
+  return renderContactList();
 };
 
 export default ContactList;

@@ -1,10 +1,10 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useContext, useState } from 'react';
 import { nanoid } from 'nanoid';
 import cl from './contactForm.module.css';
 import Plus from 'components/ui/icons/Plus';
 import clsx from 'clsx';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { Context } from 'context/globalContext';
 
 Notify.init({
   useIcon: false,
@@ -23,27 +23,22 @@ Notify.init({
   },
 });
 
-export default class ContactForm extends React.Component {
-  #INITIAL_STATE = {
-    name: '',
-    number: '',
+export default function ContactForm() {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+
+  const { contacts, setContacts } = useContext(Context);
+
+  const reset = () => {
+    setName('');
+    setNumber('');
   };
 
-  state = {
-    ...this.#INITIAL_STATE,
-  };
-
-  reset = () => {
-    this.setState(() => ({
-      ...this.#INITIAL_STATE,
-    }));
-  };
-
-  checkContactName = () => {
-    return this.props.state.contacts.find(contact => {
+  const checkContactName = () => {
+    return contacts.find(contact => {
       return (
         contact.name.trim().toLowerCase() ===
-        this.state.name
+        name
           .trim()
           .split(' ')
           .filter(word => word !== '')
@@ -53,15 +48,15 @@ export default class ContactForm extends React.Component {
     });
   };
 
-  checkContactNumber = () => {
-    return this.props.state.contacts.find(contact => {
+  const checkContactNumber = () => {
+    return contacts.find(contact => {
       return (
         contact.number
           .trim()
           .split(' ')
           .filter(num => num !== '')
           .join('') ===
-        this.state.number
+        number
           .trim()
           .split(' ')
           .filter(num => num !== '')
@@ -70,7 +65,7 @@ export default class ContactForm extends React.Component {
     });
   };
 
-  checkDuplicates = (nameClone, numberClone) => {
+  const checkDuplicates = (nameClone, numberClone) => {
     if (nameClone && numberClone && nameClone.name === numberClone.name) {
       Notify.warning(
         `Maaan, do you lost your eyeballs? Exact same!!! Ok I'll give you another chance ;)`
@@ -92,83 +87,78 @@ export default class ContactForm extends React.Component {
     }
   };
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
 
-    const nameClone = this.checkContactName();
-    const numberClone = this.checkContactNumber();
+    const nameClone = checkContactName();
+    const numberClone = checkContactNumber();
 
-    if (!this.checkDuplicates(nameClone, numberClone)) {
+    if (!checkDuplicates(nameClone, numberClone)) {
       return;
     }
 
     const newContact = {
       id: nanoid(),
-      name: this.state.name
+      name: name
         .trim()
         .split(' ')
         .filter(word => word !== '')
         .join(' '),
-      number: this.state.number,
+      number: number,
     };
 
-    this.props.updateContacts([newContact, ...this.props.state.contacts]);
-    this.reset();
+    setContacts([newContact, ...contacts]);
+    reset();
   };
 
-  handleChange = e => {
-    this.setState({ [e.target.name]: e.target.value });
+  const handleChange = e => {
+    e.target.name === 'name'
+      ? setName(e.target.value)
+      : setNumber(e.target.value);
   };
 
-  render() {
-    return (
-      <form className={cl.form} onSubmit={this.handleSubmit}>
-        <div className={cl.inputContainer}>
-          <div className={cl.inputField}>
-            <input
-              className={clsx(cl.input, cl['name'])}
-              type="text"
-              name="name"
-              id="name"
-              pattern="^[a-zA-Zа-яА-ЯІіЇїҐґ' \-\u0400-\u04FF]+$"
-              title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-              required
-              onChange={this.handleChange}
-              value={this.state.name}
-              placeholder="Stepan Bandera"
-            />
-            <label className={cl.label} htmlFor="name">
-              Name
-            </label>
-          </div>
-
-          <div className={cl.inputField}>
-            <input
-              className={clsx(cl.input, cl['number'])}
-              type="tel"
-              name="number"
-              id="number"
-              pattern="[0-9+\-\(\) ]*"
-              title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-              required
-              onChange={this.handleChange}
-              value={this.state.number}
-              placeholder="(063) 967-21-44"
-            />
-            <label className={cl.label} htmlFor="number">
-              Number
-            </label>
-          </div>
+  return (
+    <form className={cl.form} onSubmit={handleSubmit}>
+      <div className={cl.inputContainer}>
+        <div className={cl.inputField}>
+          <input
+            className={clsx(cl.input, cl['name'])}
+            type="text"
+            name="name"
+            id="name"
+            pattern="^[a-zA-Zа-яА-ЯІіЇїҐґ' \-\u0400-\u04FF]+$"
+            title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+            required
+            onChange={handleChange}
+            value={name}
+            placeholder="Stepan Bandera"
+          />
+          <label className={cl.label} htmlFor="name">
+            Name
+          </label>
         </div>
-        <button className={cl.button}>
-          <Plus />
-        </button>
-      </form>
-    );
-  }
-}
 
-ContactForm.propTypes = {
-  state: PropTypes.object.isRequired,
-  updateContacts: PropTypes.func.isRequired,
-};
+        <div className={cl.inputField}>
+          <input
+            className={clsx(cl.input, cl['number'])}
+            type="tel"
+            name="number"
+            id="number"
+            pattern="[0-9+\-\(\) ]*"
+            title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+            required
+            onChange={handleChange}
+            value={number}
+            placeholder="(063) 967-21-44"
+          />
+          <label className={cl.label} htmlFor="number">
+            Number
+          </label>
+        </div>
+      </div>
+      <button className={cl.button}>
+        <Plus />
+      </button>
+    </form>
+  );
+}
